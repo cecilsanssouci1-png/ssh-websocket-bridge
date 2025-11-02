@@ -9,13 +9,22 @@ const server = app.listen(process.env.PORT || 3000, () =>
 
 const wss = new WebSocketServer({ server });
 
-wss.on("connection", (ws) => {
-  ws.send("?? Connected to SSH bridge");
+wss.on("connection", (ws, req) => {
+  // Simple token check: ?token=YOUR_ACCESS_TOKEN
+  const url = new URL(req.url, `http://${req.headers.host}`);
+  const token = url.searchParams.get("token");
+
+  if (token !== process.env.ACCESS_TOKEN) {
+    ws.send("❌ Unauthorized: Invalid token");
+    return ws.close();
+  }
+
+  ws.send("🔗 Connected to secure SSH bridge");
 
   const ssh = new Client();
   ssh
     .on("ready", () => {
-      ws.send("? SSH connected\n");
+      ws.send("✅ SSH connected\n");
       ssh.shell((err, stream) => {
         if (err) return ws.send("Shell error: " + err.message);
 
@@ -29,6 +38,6 @@ wss.on("connection", (ws) => {
       host: process.env.SSH_HOST,
       port: 22,
       username: process.env.SSH_USER,
-      password: process.env.SSH_PASS
+      password: process.env.SSH_PASS,
     });
 });
