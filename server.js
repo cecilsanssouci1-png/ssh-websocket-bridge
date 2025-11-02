@@ -12,7 +12,7 @@ const wss = new WebSocketServer({ server });
 wss.on("connection", (ws, req) => {
   // Simple token check: ?token=YOUR_ACCESS_TOKEN
   const url = new URL(req.url, `http://${req.headers.host}`);
-  const token = url.searchParams.get("token");
+  const token = url.searchParams.get("df1e0b1a-66c9-48a0-aa0d-ce274583fd3a");
 
   if (token !== process.env.ACCESS_TOKEN) {
     ws.send("❌ Unauthorized: Invalid token");
